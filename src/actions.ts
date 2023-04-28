@@ -1066,6 +1066,7 @@ export function GetActions(instance: InstanceBaseExt<ZoomConfig>): CompanionActi
 			name: 'Clear Selections',
 			options: [],
 			callback: () => {
+				instance.log('debug', 'actions clearParticipants')
 				PreviousSelectedCallersSave()
 				instance.ZoomClientDataObj.selectedCallers.length = 0
 				instance.UpdateVariablesValues()
@@ -1227,10 +1228,7 @@ export function GetActions(instance: InstanceBaseExt<ZoomConfig>): CompanionActi
 				if (index !== -1) instance.ZoomVariableLink[index].userName = newName
 				instance.ZoomGroupData.forEach((group: ZoomGroupDataInterface) => {
 					group.users.forEach((user) => {
-						if (user.zoomID === ZoomID) {
-							user.userName = newName
-							return
-						}
+						if (user.zoomID === ZoomID) user.userName = newName
 					})
 				})
 				instance.UpdateVariablesValues()
@@ -3516,12 +3514,14 @@ export function GetActions(instance: InstanceBaseExt<ZoomConfig>): CompanionActi
 					// should be otherwise somethings wrong
 					if (selectedCallers.length === 0) {
 						// return something to prevent users from sending a command
-						instance.log('debug', 'Select a caller first')
+						instance.log('info', 'Select a caller first')
 					}
 					// When command is for one user only send first caller
 					if (singleUser) {
 						command.args.push({ type: 'i', value: selectedCallers[0] })
-						instance.log('debug', 'You have selected multiple participants but only the first one is allowed')
+						if (selectedCallers.length > 1) {
+							instance.log('warn', 'You have selected multiple participants but only the first one is allowed')
+						}
 					} else {
 						selectedCallers.forEach((caller) => {
 							command.args.push({ type: 'i', value: caller })
@@ -3533,7 +3533,7 @@ export function GetActions(instance: InstanceBaseExt<ZoomConfig>): CompanionActi
 				// Different path when more than one users are selected
 				if (allExcept) {
 					command.oscPath =
-						(command.args.length > 1 ? `/zoom/allExcept/users/zoomID` : `/zoom/allExcept/zoomID`) + OSCAction
+						(command.args.length > 1 ? `/zoom/allExcept/users/zoomID` : `/zoom/allExecpt/zoomID`) + OSCAction
 				} else {
 					command.oscPath = (command.args.length > 1 ? `/zoom/users/zoomID` : `/zoom/zoomID`) + OSCAction
 				}
