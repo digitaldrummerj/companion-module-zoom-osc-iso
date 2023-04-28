@@ -1066,7 +1066,6 @@ export function GetActions(instance: InstanceBaseExt<ZoomConfig>): CompanionActi
 			name: 'Clear Selections',
 			options: [],
 			callback: () => {
-				instance.log('debug', 'actions clearParticipants')
 				PreviousSelectedCallersSave()
 				instance.ZoomClientDataObj.selectedCallers.length = 0
 				instance.UpdateVariablesValues()
