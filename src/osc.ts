@@ -89,6 +89,7 @@ export class OSC {
 			// See if ZoomOSC is active
 			this.pingInterval = setInterval(() => {
 				if (this.needToPingPong) {
+					this.instance.log('debug', 'Ping Interval Running')
 					// Shall we leave this?
 					this.instance.updateStatus(InstanceStatus.Connecting, 'checking connection')
 					this.sendCommand('/zoom/ping')
@@ -186,7 +187,7 @@ export class OSC {
 		const zoomPart3 = recvMsg[3]
 		let zoomId: number
 
-		// this.instance.log('info', 'receiving:' + JSON.stringify(data))
+		this.instance.log('info', 'receiving:' + JSON.stringify(data))
 		// Do a switch block to go fast through the rest of the data
 		if (zoomPart1 == 'zoomosc') {
 			this.instance.ZoomClientDataObj.last_response = Date.now()
@@ -499,7 +500,7 @@ export class OSC {
 							break
 						default:
 							this.instance.log('info', 'No Case provided for:' + data.address)
-							this.instance.log('info', 'Arguments' + JSON.stringify(data.args))
+							this.instance.log('info', 'Unknown User Command: ' + JSON.stringify(data.args))
 					}
 					break
 
@@ -546,7 +547,7 @@ export class OSC {
 						// this.instance.updateStatus(InstanceStatus.UnknownError, 'LIMITED, UNLICENSED')
 					}
 
-					this.instance.log('debug', `${versionInfo} ${data.args[7].value === 1 ? 'Pro' : 'Lite or Essentials'}`)
+					this.instance.log('debug', `Pong ${versionInfo} ${data.args[7].value === 1 ? 'Pro' : 'Lite or Essentials'}`)
 					this.instance.ZoomClientDataObj.zoomOSCVersion = versionInfo
 					switch (versionInfo.substring(0, 4)) {
 						case 'ZISO':
@@ -568,7 +569,7 @@ export class OSC {
 							break
 						default:
 							// Default to ZoomOSC no pulling of data
-							this.instance.log('info', `Wrong version status:${this.instance.ZoomClientDataObj.zoomOSCVersion}`)
+							this.instance.log('info', `Unknown version status:${this.instance.ZoomClientDataObj.zoomOSCVersion}`)
 							break
 					}
 					// this.instance.saveConfig(this.instance.config)
@@ -631,8 +632,8 @@ export class OSC {
 					}
 					break
 				}
-				case 'meetingStatus':
-					// this.instance.log('info', 'receiving:' + JSON.stringify(data))
+				case 'meetingStatus': // this does not reliable get sent and many times does not get sent at all.
+					this.instance.log('info', 'meeting status receiving:' + JSON.stringify(data))
 					this.instance.ZoomClientDataObj.callStatus = data.args[0].value
 					// Meeting status ended
 					if (data.args[0].value === 0) {
@@ -725,7 +726,7 @@ export class OSC {
 				}
 				default:
 					this.instance.log('info', 'No Case provided for:' + data.address)
-					this.instance.log('info', 'Arguments' + JSON.stringify(data.args))
+					this.instance.log('info', 'Unknown Command Response: ' + JSON.stringify(data.args))
 			}
 		}
 	}
@@ -735,7 +736,7 @@ export class OSC {
 	 * @description Check OSC connection status and format command to send to Zoom
 	 */
 	public readonly sendCommand = (path: string, args?: OSCSomeArguments): void => {
-		// this.instance.log('debug', `sending ${JSON.stringify(path)} ${args ? JSON.stringify(args) : ''}`)
+		this.instance.log('debug', `sending ${JSON.stringify(path)} ${args ? JSON.stringify(args) : ''}`)
 		this.udpPort.send(
 			{
 				address: path,
